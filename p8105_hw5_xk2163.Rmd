@@ -1,0 +1,50 @@
+---
+title: "p8105_hw5_xk2163"
+author: "Kang"
+date: "2024-11-16"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Question 2
+
+```{r}
+set.seed(123)
+n <- 30         
+sigma <- 5       
+mu_values <- c(0, 1, 2, 3, 4, 5, 6) # True mean values
+alpha <- 0.05    
+n_simulations <- 5000
+```
+
+```{r}
+# Function to simulate data, perform t-test, and return results
+simulate_t_test <- function(mu, n, sigma, n_simulations) {
+  results <- replicate(n_simulations, {
+    # Generate dataset
+    x <- rnorm(n, mean = mu, sd = sigma)
+    
+    # Perform t-test
+    t_test <- t.test(x, mu = 0)
+    
+    # Extract estimate and p-value
+    tidy_t <- broom::tidy(t_test)
+    c(mu_hat = tidy_t$estimate, p_value = tidy_t$p.value)
+  }, simplify = TRUE)
+  
+  # Convert results to a dataframe
+  results_df <- as.data.frame(t(results))
+  names(results_df) <- c("mu_hat", "p_value")
+  results_df$true_mu <- mu
+  return(results_df)
+}
+
+# Apply the simulation for each mu value
+all_results <- lapply(mu_values, simulate_t_test, n = n, sigma = sigma, n_simulations = n_simulations)
+all_results <- bind_rows(all_results)
+
+```
+
