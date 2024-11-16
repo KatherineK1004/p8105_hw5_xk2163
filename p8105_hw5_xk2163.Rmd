@@ -21,7 +21,7 @@ alpha = 0.05
 n_simulations = 5000
 ```
 
-In the first part, we need to define all the parameters we are goiing to use in the 
+In the first part, we need to define all the parameters we are goiing to use in the the question 2.
 
 ```{r}
 
@@ -41,8 +41,9 @@ simulate_t_test = function(mu, n, sigma, n_simulations) {
 
 all_results = lapply(mu_values, simulate_t_test, n = n, sigma = sigma, n_simulations = n_simulations)
 all_results = bind_rows(all_results)
-
 ```
+
+For convenience, I generate this procedure into a function which can make this procedure much more clear and efficient. 
 
 ```{r}
 power_results = all_results |>
@@ -58,6 +59,7 @@ ggplot(power_results, aes(x = true_mu, y = power)) +
   theme_minimal()
 ```
 
+The x-axis as the true mean ($\mu$), representing the effect size.The y-axis as the power, representing the proportion of times the null hypothesis is rejected.A curve showing that power increases with larger effect sizes.
 
 ```{r}
 average_results = all_results |>
@@ -78,11 +80,15 @@ ggplot(average_results, aes(x = true_mu)) +
 
 ```
 
+The graph illustrates two sets of data: 
+
+* The blue line represents the average estimate of $\hat \mu$ across all tests, irrespective of whether the null hypothesis was rejected.
+
+* The red line represents the average estimate of $\hat \mu$ only for tests where the null hypothesis ($H_0:\mu = 0$) was rejected.
+
+The sample average of $\hat \mu$ across tests for which the null was rejected is not approximately equal to the true value of $\mu$. This occurs because rejecting the null hypothesis selects tests with larger sample means, introducing a bias (seen in the red line) that overestimates the true mean. In contrast, the blue line (all tests) shows an unbiased estimate of $\mu$.
+
 # Question 3
-
-# Problem 3
-
-# Problem 2
 
 ```{r}
 data_df = 
@@ -94,6 +100,7 @@ data_df =
   
 ```
 
+After loading the required data set, I generate a new variable called `city_state` by combining city and state as required and converted the `victim_age` into numeric variable.
 
 ```{r}
 city_summary =
@@ -110,6 +117,10 @@ city_summary |>
     col.names = c("City, State", "Total Homicides", "Unsolved Homicides"),
     format = "latex")
 ```
+
+Then, I use group_by to stratify the data and try to obtain the total number of homicides and the number of unsolved homicides. I output this table by using `knitr::kable`, and the result are shown above.
+
+## Analysis for Baltimore, MD
 
 ```{r}
 baltimore_data =
@@ -133,9 +144,11 @@ baltimore_summary |>
     caption = "Proportion of Unsolved Homicides in Baltimore, MD")
 ```
 
+A one-sample proportion test (prop.test) is conducted to estimate the proportion of unsolved homicides and compute the confidence interval.The results are tidied using broom::tidy, and a table summarizing the proportion and confidence interval is generated with knitr::kable.
+
 In the above result, we can clearly see that the p-value of the proportions test is way smaller than 0.05, which means we need to reject the null and conclude that the successful probability is statistically different from 0.5. And its estimate and confidence interval is shown above as well.
 
-## For each city
+## City-Wide Summary of Proportions
 
 ```{r}
 city_summary = 
@@ -171,7 +184,9 @@ city_results |>
       "Significance"),format = "latex")
 ```
 
-## Making Plot
+The city-wise summary calculates the proportion of unsolved homicides and uses prop.test for each city to obtain estimates, confidence intervals, and p-values. The map2 function applies prop.test row-by-row, and map_dbl extracts numeric values from the results.A significance column is added to indicate whether the result is statistically significant (p<0.05).The results are output as a formatted table with clear column names and captions.
+
+## Visualization for City-wide Summary
 
 ```{r}
 city_results = city_results |>
@@ -192,6 +207,6 @@ ggplot(city_results, aes(x = city_state, y = estimate)) +
     axis.text.y = element_text(size = 10),
     axis.title = element_text(size = 12),
     plot.title = element_text(size = 14, face = "bold"))
-
 ```
 
+The cities are arranged in descending order of the proportion of unsolved homicides to make the plot more interpretable.A scatter plot is created to visualize the proportions, and error bars represent the 95% confidence intervals. And the plot are shown above.
